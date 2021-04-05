@@ -22,7 +22,7 @@ class LazyBlocks_Templates {
         add_action( 'init', array( $this, 'register_post_type' ) );
 
         // add template to posts.
-        add_action( 'init', array( $this, 'add_template_to_posts' ) );
+        add_action( 'init', array( $this, 'add_template_to_posts' ), 100 );
 
         // enqueue Gutenberg on templates screen.
         add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ) );
@@ -61,12 +61,13 @@ class LazyBlocks_Templates {
      * Get all templates array.
      *
      * @param bool $db_only - get templates from database only.
+     * @param bool $no_cache - get templates without cache.
      *
      * @return array|null
      */
-    public function get_templates( $db_only = false ) {
+    public function get_templates( $db_only = false, $no_cache = false ) {
         // fetch templates.
-        if ( null === $this->templates ) {
+        if ( null === $this->templates || $no_cache ) {
             $this->templates = array();
 
             // get all lazyblocks_templates post types.
@@ -161,7 +162,7 @@ class LazyBlocks_Templates {
         register_post_type(
             'lazyblocks_templates',
             array(
-                'labels' => array(
+                'labels'       => array(
                     'name'          => __( 'Templates', '@@text_domain' ),
                     'singular_name' => __( 'Template', '@@text_domain' ),
                 ),
@@ -182,8 +183,8 @@ class LazyBlocks_Templates {
                     'delete_posts'       => 'delete_lazyblocks',
                     'delete_post'        => 'delete_lazyblock',
                 ),
-                'rewrite' => true,
-                'supports' => array(
+                'rewrite'      => true,
+                'supports'     => array(
                     'title',
                     'revisions',
                     'custom-fields',
@@ -191,12 +192,16 @@ class LazyBlocks_Templates {
             )
         );
 
-        register_meta( 'post', 'lzb_template_data', array(
-            'object_subtype' => 'lazyblocks_templates',
-            'show_in_rest'   => true,
-            'single'         => true,
-            'type'           => 'string',
-        ) );
+        register_meta(
+            'post',
+            'lzb_template_data',
+            array(
+                'object_subtype' => 'lazyblocks_templates',
+                'show_in_rest'   => true,
+                'single'         => true,
+                'type'           => 'string',
+            )
+        );
     }
 
     /**
@@ -226,12 +231,14 @@ class LazyBlocks_Templates {
      * Redirect from templates list page.
      */
     public function admin_list_redirect() {
+        // phpcs:ignore
         if ( ! isset( $_GET['post_type'] ) || empty( $_GET['post_type'] ) ) {
             return;
         }
 
+        // phpcs:ignore
         if ( 'lazyblocks_templates' === $_GET['post_type'] ) {
-            wp_redirect( 'edit.php?post_type=lazyblocks&page=lazyblocks_templates' );
+            wp_safe_redirect( 'edit.php?post_type=lazyblocks&page=lazyblocks_templates' );
             exit();
         }
     }
@@ -259,14 +266,16 @@ class LazyBlocks_Templates {
             'after'
         );
 
+        // phpcs:ignore
         do_action( 'enqueue_block_editor_assets' );
 
         // Lazyblocks Templates.
         wp_enqueue_script(
             'lazyblocks-templates',
-            lazyblocks()->plugin_url . 'assets/admin/templates/index.min.js',
+            lazyblocks()->plugin_url() . 'assets/admin/templates/index.min.js',
             array( 'wp-blocks', 'wp-block-library', 'wp-data', 'wp-element', 'wp-components', 'wp-api', 'wp-i18n' ),
-            filemtime( lazyblocks()->plugin_path . 'assets/admin/templates/index.min.js' )
+            '@@plugin_version',
+            true
         );
     }
 }

@@ -1,12 +1,22 @@
 @import "../../variables";
 
-.post-type-lazyblocks .lazyblocks-component-document-tabs .components-panel__header.edit-post-sidebar-header {
-    display: flex;
-    margin: -16px;
-    margin-bottom: -1px;
+.post-type-lazyblocks {
+    // fixed overflow and dropdowns in editor sidebar.
+    .edit-post-sidebar > .components-panel {
+        min-height: 100%;
+    }
+
+    .lazyblocks-component-document-tabs .components-panel__header.edit-post-sidebar-header {
+        display: flex;
+        margin-bottom: -1px;
+    }
 }
 
 .lazyblocks-component-document-tabs .lazyblocks-component-document-tabs-content {
+    .components-base-control__label {
+        display: inline-block;
+        margin-bottom: 8px;
+    }
     .components-base-control__help {
         color: $color_dark_lighten_2;
     }
